@@ -63,25 +63,39 @@ public class ComplexAnalytics {
 	//3.2 RetentionRateCalculator 
 	
 	@GetMapping("/RetentionRateCalculator")
-	public void RetentionRateCalculator() {
-	    
-	        // Sample data: Replace with actual data fetched from SQL
-	        Set<Integer> janCustomers = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5)); // Customers in January
-	        Set<Integer> febCustomers = new HashSet<>(Arrays.asList(2, 3, 4, 5, 6)); // Customers in February
-
-	        // Find overlapping customers (customers who ordered in both months)
-	        Set<Integer> returningCustomers = new HashSet<>(janCustomers);
-	        returningCustomers.retainAll(febCustomers);
-
-	        // Calculate retention rate
-	        int totalCustomersInJan = janCustomers.size();
-	        int returningCustomerCount = returningCustomers.size();
-	        double retentionRate = (double) returningCustomerCount / totalCustomersInJan * 100;
-
-	        // Output results
-	        System.out.println("Returning Customers: " + returningCustomerCount);
-	        System.out.println("Total Customers in January: " + totalCustomersInJan);
-	        System.out.printf("Retention Rate: %.2f%%\n", retentionRate);
+	public Map<Month,String> RetentionRateCalculator() {
+		
+		List<Month> listOfOrderMonths= Arrays.asList(Month.JANUARY,Month.FEBRUARY,Month.MARCH,Month.APRIL,Month.MAY,Month.JUNE,Month.JULY,Month.AUGUST,Month.SEPTEMBER,Month.OCTOBER,Month.NOVEMBER,Month.DECEMBER);
+	    Map<Month,String> monthwiseRetention = new HashMap<>();
+	        // Sample data: Replace with actual data fetched from database
+		Map<Month, Set<Customer>> list=orderService.getAllOrders().stream()
+		.filter(order -> order.getOrderDate() != null)
+            .collect(Collectors.groupingBy(
+                order -> order.getOrderDate().getMonth(),  // Extract month
+                Collectors.mapping(Orders::getCustomer, Collectors.toSet())  // Sum revenue
+            ));
+		
+		for (int i = 0; i < listOfOrderMonths.size()-1; i++) {
+			 Set<Integer> month01=new HashSet<>();
+			  Set<Integer> month02=new HashSet<>();
+			   if(list.get(listOfOrderMonths.get(i))!=null && list.get(listOfOrderMonths.get(i+1))!=null) {
+		           month01= list.get(listOfOrderMonths.get(i)).stream().map(Customer::getId).collect(Collectors.toSet());
+		           month02= list.get(listOfOrderMonths.get(i+1)).stream().map(Customer::getId).collect(Collectors.toSet());
+		 
+			   }
+	           // Find overlapping customers (customers who ordered in both months)
+		        Set<Integer> returningCustomers = new HashSet<>(month01);
+		        returningCustomers.retainAll(month02);
+		        int totalCustomersInJan = month01.size();
+		        int returningCustomerCount = returningCustomers.size();
+		        double retentionRate = (double) returningCustomerCount / totalCustomersInJan * 100;
+		        System.out.println("Returning Customers:  "+returningCustomerCount);
+		        System.out.println("Total Customers in : "+ listOfOrderMonths.get(i) +": " + totalCustomersInJan);
+		        System.out.printf("Retention Rate: %.2f%%\n", retentionRate);
+		        monthwiseRetention.put(listOfOrderMonths.get(i), "Returning Customers:  "+returningCustomerCount + "  Total Customers in : "+ listOfOrderMonths.get(i) +": " + totalCustomersInJan + "  Retention Rate: "+ retentionRate);
+		}
+		return monthwiseRetention;
+		 
 	}
 	//3.3 Longest Order Processing Times
 	
