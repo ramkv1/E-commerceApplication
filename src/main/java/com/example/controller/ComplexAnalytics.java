@@ -68,7 +68,8 @@ public class ComplexAnalytics {
 		List<Month> listOfOrderMonths= Arrays.asList(Month.JANUARY,Month.FEBRUARY,Month.MARCH,Month.APRIL,Month.MAY,Month.JUNE,Month.JULY,Month.AUGUST,Month.SEPTEMBER,Month.OCTOBER,Month.NOVEMBER,Month.DECEMBER);
 	    Map<Month,String> monthwiseRetention = new HashMap<>();
 	        // Sample data: Replace with actual data fetched from database
-		Map<Month, Set<Customer>> list=orderService.getAllOrders().stream()
+	    Map<Month, Set<Customer>> list=new HashMap<>();
+		 list=orderService.getAllOrders().stream()
 		.filter(order -> order.getOrderDate() != null)
             .collect(Collectors.groupingBy(
                 order -> order.getOrderDate().getMonth(),  // Extract month
